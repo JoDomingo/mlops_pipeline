@@ -9,6 +9,7 @@ ipykernel
 seaborn
 ipywidgets
 scikit-learn
+feature-engine==1.9.4
 xgboost
 pydantic
 fastapi
