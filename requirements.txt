@@ -7,6 +7,7 @@ jupyter
 notebook
 ipykernel
 seaborn
+matplotlib==3.11.1
 ipywidgets
 scikit-learn
 feature-engine==1.9.4
