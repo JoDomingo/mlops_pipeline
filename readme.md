@@ -476,8 +476,9 @@ Versiones estables publicadas hasta el momento:
 | `V1.0.1` | Carga de datos y EDA |
 | `V1.1.0` | Feature Engineering |
 | `V1.2.0` | Model Training and Evaluation |
+| `V1.3.0` | Model Monitoring and Streamlit Dashboard |
 
-El desarrollo de monitoreo correspondiente al Avance 3 se encuentra actualmente en la rama `developer` y todavía no posee un nuevo tag estable.
+El Avance 3 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
 
 ## Limitaciones
 
@@ -498,6 +499,7 @@ Avances completados:
 ```text
 Avance 1 → Versionamiento, carga y EDA
 Avance 2 → Feature Engineering y Model Training and Evaluation
+Avance 3 → Model Monitoring and Streamlit Dashboard
 ```
 
 Estado del Avance 3:
