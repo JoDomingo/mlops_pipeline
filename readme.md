@@ -527,10 +527,13 @@ Versiones estables publicadas hasta el momento:
 | `V1.1.0` | Feature Engineering |
 | `V1.2.0` | Model Training and Evaluation |
 | `V1.3.0` | Model Monitoring and Streamlit Dashboard |
+| `V1.4.0` | FastAPI and Docker Deployment |
 
 El Avance 3 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
 
-El Avance 4 se encuentra actualmente desarrollado y validado técnicamente en `developer`. La certificación, integración en `main` y publicación de una nueva versión se realizarán después de completar las verificaciones finales.
+El Avance 4 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
+
+La versión estable correspondiente al despliegue mediante FastAPI y Docker fue publicada como `V1.4.0`.
 
 ## Limitaciones
 
@@ -560,12 +563,13 @@ Avance 4 → FastAPI, Docker y publicación de imagen en Docker Hub
 Estado del Avance 4:
 
 ```text
-API, validaciones, contenerización y publicación en Docker Hub completadas en developer.
-Pendiente de certificación, integración en main y publicación de nueva versión Git.
+API, validaciones, contenerización y publicación en Docker Hub completadas.
+Avance 4 certificado e integrado en main.
+Imagen publicada y validada en Docker Hub.
 ```
 
 Última versión estable publicada:
 
 ```text
-V1.3.0
+V1.4.0
 ```
