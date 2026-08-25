@@ -2,7 +2,7 @@
 
 Proyecto Integrador correspondiente al Módulo 5 **Fundamentos de Nube y Ciencia de Datos de Producción** de la carrera de Data Science de Henry.
 
-El proyecto desarrolla un flujo de Machine Learning orientado a un caso de riesgo crediticio, incorporando prácticas de versionamiento, reproducibilidad, modelamiento supervisado y monitoreo de Data Drift.
+El proyecto desarrolla un flujo de Machine Learning orientado a un caso de riesgo crediticio, incorporando prácticas de versionamiento, reproducibilidad, modelamiento supervisado, monitoreo de Data Drift y despliegue mediante una API contenerizada.
 
 ## Caso de negocio
 
@@ -10,16 +10,22 @@ El proyecto simula el trabajo del equipo de Datos y Analítica de una empresa fi
 
 El objetivo de negocio es utilizar información histórica de créditos para anticipar el riesgo de incumplimiento de nuevos usuarios. A partir de esta necesidad se construyó un flujo progresivo que incluye:
 
-- carga y comprensión de datos;
-- análisis exploratorio;
-- reglas reproducibles de calidad;
+- Carga y comprensión de datos;
+- Análisis exploratorio;
+- Reglas reproducibles de calidad;
 - Feature Engineering;
-- entrenamiento y comparación de modelos supervisados;
-- selección de un modelo base;
-- monitoreo temporal;
-- detección de Data Drift;
-- generación de alertas y recomendaciones;
-- visualización mediante Streamlit.
+- Entrenamiento y comparación de modelos supervisados;
+- Selección de un modelo base;
+- Monitoreo temporal;
+- Detección de Data Drift;
+- Generación de alertas y recomendaciones;
+- Visualización mediante Streamlit;
+- Exposición del modelo mediante una API con FastAPI;
+- Validación de solicitudes y respuestas con Pydantic;
+- Soporte para predicción individual y por lotes;
+- Documentación automática mediante OpenAPI y Swagger UI;
+- Contenerización de la API con Docker;
+- Publicación y recuperación de la imagen mediante Docker Hub.
 
 ## Objetivo técnico
 
@@ -42,8 +48,11 @@ mlops_pipeline/
 │
 ├── Base_de_datos.csv
 ├── requirements.txt
+├── Dockerfile
+├── .dockerignore
 ├── .gitignore
 └── readme.md
+```
 
 ## Flujo de trabajo con Git
 
@@ -431,6 +440,41 @@ Para drift crítico reciente se recomienda investigar el cambio y comprobar si p
 
 La detección de Data Drift no implica automáticamente que el modelo deba reentrenarse. Idealmente debe complementarse con monitoreo de performance cuando existan resultados reales disponibles.
 
+## Despliegue del modelo
+
+El despliegue se implementa en:
+```text
+src/model_deploy.py
+```
+El modelo base seleccionado, Gradient Boosting, se expone mediante una API desarrollada con FastAPI.
+
+La implementación reutiliza las reglas de calidad, el Feature Engineering y el preprocesamiento definidos en los avances anteriores. También mantiene la decisión conservadora de excluir `puntaje` del modelamiento principal.
+
+Al iniciar la aplicación se reconstruye y entrena el pipeline de despliegue utilizando la misma configuración reproducible del Avance 2.
+
+### Contrato de entrada
+
+La API recibe las variables originales necesarias para realizar inferencia.
+
+No se solicitan al cliente:
+
+- la variable objetivo;
+- `puntaje`;
+- las features temporales derivadas;
+- los ratios financieros derivados.
+
+Las transformaciones necesarias se generan internamente antes de ejecutar la predicción.
+
+Pydantic se utiliza para validar tipos, estructura y categorías permitidas.
+
+### Endpoint de predicción
+
+El endpoint principal es:
+
+```text
+POST /predict
+```
+
 ## Instalación
 
 Crear un entorno virtual:
@@ -465,6 +509,12 @@ python -m pip install -r requirements.txt
 - Scikit-learn
 - Feature-engine
 - Streamlit
+- FastAPI
+- Pydantic
+- Uvicorn
+- Docker
+- Docker Hub
+- WSL 2
 
 ## Versionamiento
 
@@ -480,6 +530,8 @@ Versiones estables publicadas hasta el momento:
 
 El Avance 3 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
 
+El Avance 4 se encuentra actualmente desarrollado y validado técnicamente en `developer`. La certificación, integración en `main` y publicación de una nueva versión se realizarán después de completar las verificaciones finales.
+
 ## Limitaciones
 
 El proyecto presenta algunas limitaciones que deben considerarse al interpretar los resultados:
@@ -491,6 +543,8 @@ El proyecto presenta algunas limitaciones que deben considerarse al interpretar 
 - Las variables temporales cambian naturalmente al avanzar el calendario.
 - La variable `puntaje` presenta separación perfecta de las clases, pero no existe suficiente información de negocio para demostrar Data Leakage.
 - El monitoreo realizado simula una operación temporal utilizando el dataset histórico disponible; no corresponde a un flujo real de datos productivos en tiempo real.
+- El pipeline de despliegue se reconstruye y entrena al iniciar la API; en un entorno productivo más maduro sería conveniente serializar y versionar el artefacto entrenado para desacoplar entrenamiento e inferencia.
+- La API y la imagen Docker representan un despliegue reproducible del modelo base, pero no convierten al modelo en un modelo productivo definitivo; las limitaciones predictivas detectadas anteriormente, especialmente el bajo Recall, continúan vigentes.
 
 ## Estado actual del proyecto
 
@@ -500,17 +554,18 @@ Avances completados:
 Avance 1 → Versionamiento, carga y EDA
 Avance 2 → Feature Engineering y Model Training and Evaluation
 Avance 3 → Model Monitoring and Streamlit Dashboard
+Avance 4 → FastAPI, Docker y publicación de imagen en Docker Hub
 ```
 
-Estado del Avance 3:
+Estado del Avance 4:
 
 ```text
-Monitoreo y aplicación Streamlit desarrollados en developer.
-Pendiente de certificación, integración en main y publicación de nueva versión.
+API, validaciones, contenerización y publicación en Docker Hub completadas en developer.
+Pendiente de certificación, integración en main y publicación de nueva versión Git.
 ```
 
 Última versión estable publicada:
 
 ```text
-V1.2.0
+V1.3.0
 ```
