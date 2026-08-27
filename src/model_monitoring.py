@@ -27,16 +27,26 @@ from src.model_training_evaluation import (
     build_models,
 )
 
+REFERENCE_PERIOD = "Referencia histórica"
+
+DRIFT_MODERATE = "Drift moderado"
+DRIFT_SIGNIFICANT = "Drift significativo"
+
+EXPECTED_TEMPORAL_CHANGE = "Cambio temporal esperado"
+EVALUABLE_POPULATION_DRIFT = "Drift poblacional evaluable"
+
+CRITICAL_ALERT = "Crítica"
+
+PERSISTENT_CRITICAL_DRIFT = "Drift crítico persistente"
+RECENT_CRITICAL_DRIFT = "Drift crítico reciente"
 
 MONITORING_PERIOD_ORDER = [
-    "Referencia histórica",
+    REFERENCE_PERIOD,
     "2025-Q3",
     "2025-Q4",
     "2026-Q1",
     "2026-Q2 incompleto",
 ]
-
-REFERENCE_PERIOD = "Referencia histórica"
 
 COMPLETE_MONITORING_PERIODS = [
     "2025-Q3",
@@ -110,7 +120,7 @@ def assign_monitoring_period(df):
     df.loc[
         dates < "2025-07-01",
         "periodo_monitoreo",
-    ] = "Referencia histórica"
+    ] = REFERENCE_PERIOD
 
     df.loc[
         (dates >= "2025-07-01")
@@ -330,9 +340,9 @@ def classify_ks_drift(ks_statistic):
         return "Estable"
 
     if ks_statistic <= 0.25:
-        return "Drift moderado"
+        return DRIFT_MODERATE
 
-    return "Drift significativo"
+    return DRIFT_SIGNIFICANT
 
 
 def calculate_ks_drift(
@@ -452,9 +462,9 @@ def evaluate_numeric_ks_drift(
         "feature"
     ].apply(
         lambda feature: (
-            "Cambio temporal esperado"
+            EXPECTED_TEMPORAL_CHANGE
             if feature in EXPECTED_TEMPORAL_FEATURES
-            else "Drift poblacional evaluable"
+            else EVALUABLE_POPULATION_DRIFT
         )
     )
 
@@ -482,9 +492,9 @@ def classify_psi_drift(psi_value):
         return "Estable"
 
     if psi_value <= 0.25:
-        return "Drift moderado"
+        return DRIFT_MODERATE
 
-    return "Drift significativo"
+    return DRIFT_SIGNIFICANT
 
 
 def calculate_psi_drift(
@@ -698,9 +708,9 @@ def evaluate_numeric_psi_drift(
         "feature"
     ].apply(
         lambda feature: (
-            "Cambio temporal esperado"
+            EXPECTED_TEMPORAL_CHANGE
             if feature in EXPECTED_TEMPORAL_FEATURES
-            else "Drift poblacional evaluable"
+            else EVALUABLE_POPULATION_DRIFT
         )
     )
 
@@ -729,9 +739,9 @@ def classify_js_drift(js_divergence):
         return "Estable"
 
     if js_divergence <= 0.30:
-        return "Drift moderado"
+        return DRIFT_MODERATE
 
-    return "Drift significativo"
+    return DRIFT_SIGNIFICANT
 
 
 def calculate_js_drift(
@@ -951,9 +961,9 @@ def evaluate_numeric_js_drift(
         "feature"
     ].apply(
         lambda feature: (
-            "Cambio temporal esperado"
+            EXPECTED_TEMPORAL_CHANGE
             if feature in EXPECTED_TEMPORAL_FEATURES
-            else "Drift poblacional evaluable"
+            else EVALUABLE_POPULATION_DRIFT
         )
     )
 
@@ -1226,13 +1236,13 @@ def assign_numeric_drift_alerts(summary_df):
 
     summary_df["significant_count"] = (
         summary_df[metric_columns]
-        .eq("Drift significativo")
+        .eq(DRIFT_SIGNIFICANT)
         .sum(axis=1)
     )
 
     summary_df["moderate_count"] = (
         summary_df[metric_columns]
-        .eq("Drift moderado")
+        .eq(DRIFT_MODERATE)
         .sum(axis=1)
     )
 
@@ -1241,7 +1251,7 @@ def assign_numeric_drift_alerts(summary_df):
             return "Informativa"
 
         if row["significant_count"] >= 2:
-            return "Crítica"
+            return CRITICAL_ALERT
 
         if (
             row["significant_count"] == 1
@@ -1442,7 +1452,7 @@ def identify_critical_drift_trends(temporal_summary):
         .assign(
             is_critical=(
                 temporal_summary["alert_level"]
-                == "Crítica"
+                == CRITICAL_ALERT
             )
         )
         .pivot_table(
@@ -1477,13 +1487,13 @@ def identify_critical_drift_trends(temporal_summary):
 
     def classify_trend(row):
         if row["critical_periods"] >= 2:
-            return "Drift crítico persistente"
+            return PERSISTENT_CRITICAL_DRIFT
 
         if (
             row["critical_periods"] == 1
             and row["latest_period_critical"]
         ):
-            return "Drift crítico reciente"
+            return RECENT_CRITICAL_DRIFT
 
         if row["critical_periods"] == 1:
             return "Drift crítico aislado"
@@ -1535,7 +1545,7 @@ def build_monitoring_recommendations(
     def generate_recommendation(row):
         if (
             row["trend_status"]
-            == "Drift crítico persistente"
+            == PERSISTENT_CRITICAL_DRIFT
         ):
             return (
                 "Prioridad alta: revisar la variable, "
@@ -1545,7 +1555,7 @@ def build_monitoring_recommendations(
 
         if (
             row["trend_status"]
-            == "Drift crítico reciente"
+            == RECENT_CRITICAL_DRIFT
         ):
             return (
                 "Prioridad media-alta: investigar el cambio "
@@ -1691,7 +1701,7 @@ def run_streamlit_app():
 
     critical_count = (
         selected_summary["alert_level"]
-        .eq("Crítica")
+        .eq(CRITICAL_ALERT)
         .sum()
     )
 
@@ -1848,7 +1858,7 @@ def run_streamlit_app():
     )
 
     alert_order = {
-        "Crítica": 0,
+        CRITICAL_ALERT: 0,
         "Alerta": 1,
         "Vigilancia": 2,
         "Informativa": 3,
@@ -1952,7 +1962,7 @@ def run_streamlit_app():
         bins=20,
         alpha=0.5,
         density=True,
-        label="Referencia histórica",
+        label=REFERENCE_PERIOD,
     )
 
     ax.hist(
@@ -2038,7 +2048,7 @@ def run_streamlit_app():
 
     categorical_plot_df = pd.DataFrame(
         {
-            "Referencia histórica": (
+            REFERENCE_PERIOD: (
                 reference_categories.reindex(
                     categories,
                     fill_value=0,
@@ -2114,7 +2124,7 @@ def run_streamlit_app():
     alert_columns = [
         level
         for level in [
-            "Crítica",
+            CRITICAL_ALERT,
             "Alerta",
             "Vigilancia",
             "Informativa",
@@ -2186,7 +2196,7 @@ def run_streamlit_app():
         for _, row in recommendations.iterrows():
             if (
                 row["trend_status"]
-                == "Drift crítico persistente"
+                == PERSISTENT_CRITICAL_DRIFT
             ):
                 st.error(
                     f"**{row['feature']}** — "
@@ -2196,7 +2206,7 @@ def run_streamlit_app():
 
             elif (
                 row["trend_status"]
-                == "Drift crítico reciente"
+                == RECENT_CRITICAL_DRIFT
             ):
                 st.warning(
                     f"**{row['feature']}** — "
