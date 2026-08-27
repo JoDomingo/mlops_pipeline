@@ -7,10 +7,14 @@ ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --only-binary=:all: -r requirements.txt
 
 COPY src ./src
 COPY Base_de_datos.csv .
+
+RUN useradd --create-home appuser
+
+USER appuser
 
 EXPOSE 8000
 

@@ -20,3 +20,9 @@ __pycache__/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+
+# Testing y cobertura
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
