@@ -2,7 +2,7 @@
 
 Proyecto Integrador correspondiente al Módulo 5 **Fundamentos de Nube y Ciencia de Datos de Producción** de la carrera de Data Science de Henry.
 
-El proyecto desarrolla un flujo de Machine Learning orientado a un caso de riesgo crediticio, incorporando prácticas de versionamiento, reproducibilidad, modelamiento supervisado, monitoreo de Data Drift y despliegue mediante una API contenerizada.
+El proyecto desarrolla un flujo de Machine Learning orientado a un caso de riesgo crediticio, incorporando prácticas de versionamiento, reproducibilidad, modelamiento supervisado, monitoreo de Data Drift y despliegue mediante una API contenerizada, pruebas automatizadas e integración continua con controles de calidad de código.
 
 ## Caso de negocio
 
@@ -26,17 +26,25 @@ El objetivo de negocio es utilizar información histórica de créditos para ant
 - Documentación automática mediante OpenAPI y Swagger UI;
 - Contenerización de la API con Docker;
 - Publicación y recuperación de la imagen mediante Docker Hub.
+- Pruebas automatizadas con Pytest;
+- Generación de reportes de cobertura con Pytest-Cov;
+- Integración continua mediante GitHub Actions;
+- Análisis estático y Quality Gate mediante SonarQube Cloud.
 
 ## Objetivo técnico
 
 Construir un proyecto de Machine Learning reproducible y trazable, respetando una arquitectura de archivos predefinida y un flujo de promoción de cambios entre desarrollo, certificación y producción.
 
-La estructura del repositorio no se modifica durante los avances, ya que representa una arquitectura compatible con procesos automatizados de validación y despliegue.
+La estructura del repositorio se mantuvo durante los avances. En el Extra Credir se incorporaron únicamente artefactos de soporte para testing, integración continua y análisis de calidad, sin alterar la organización principal del pipeline.
 
 ## Estructura del proyecto
 
 ```text
 mlops_pipeline/
+│
+├── .github/
+│   └── workflows/
+│       └── build.yml
 │
 ├── src/
 │   ├── Cargar_datos.ipynb
@@ -46,8 +54,13 @@ mlops_pipeline/
 │   ├── model_deploy.py
 │   └── model_monitoring.py
 │
+├── tests/
+│   └── test_model_monitoring.py
+│
 ├── Base_de_datos.csv
 ├── requirements.txt
+├── requirements-dev.txt
+├── sonar-project.properties
 ├── Dockerfile
 ├── .dockerignore
 ├── .gitignore
@@ -475,6 +488,70 @@ El endpoint principal es:
 POST /predict
 ```
 
+## Pruebas automatizadas, CI y Calidad de código
+
+El Extra Credit incorpora una capa adicional de aseguramiento de calidad sobre el pipeline.
+
+Las dependencias de desarrollo utilizadas para testing se documentan en:
+
+```text
+requirementes-dev.txt
+```
+
+Se incorporó una suite de pruebas en:
+
+```text
+tests/test_model_monitoring.py
+```
+
+La suite valida reglas críticas del módulo de monitoreo, incluyendo constantes de estaso, clasificadores de drift, períodos de referencia, asignación de alertas y recomendaciones.
+
+La ejecución validada del conjunto de pruebas fue:
+
+```text
+12 tests passed
+```
+
+La cobertura se genera mediante `pytest-cov` y se exporta a `coverage.xml` para su integración con SonarQube Cloud. Los artefactos de cobertura se consideran temporales y no forman parte del código fuente versionado.
+
+La automatización se implementa mediante:
+
+```text
+.github/workflows/build.yml
+```
+
+El workflow configura Python 3.13, instala dependencias, ejecuta las pruebas con cobertura y luego realiza el análisis de SonarQube Cloud. Se ejecuta sobre Pull Requests, al actualizar `main`y también puede lanzarse manualmente mediante `workflow_dispatch`.
+
+La configuración del proyecto para SonarQube se encuentra en:
+
+```text
+sonar-project.properties
+```
+
+La carpeta `tests/` se clasifica explicitamente como código de testing para separar correctamente los tests del código productivo durante el análisis.
+
+Como validación final del Extra Credit, el Pull Request de promoción desde `certification` hacia `main` obtuvo:
+
+```text
+Quality Gate passed
+0 New Issues
+0 Security Hotspots
+0.0% Duplication on New Code
+```
+
+El resultado del Quality Gate debe interpretarse junto con el alcance configurado del análisis; no implica cobertura exhaustiva de pruebas sobre todos los módulos del proyecto.
+
+## Hardening de Seguridad
+
+Durante el Extra Credit también se incorporaron mejoras orientadas a reducir riesgos operativos y de cadena de suministros:
+
+- Ejecución de la API dentro del contenedor con un usuario no-root;
+- Versionado explícito de dependencias directas;
+- Instalación restringida a paquetes binarios mediante `--only-binary=:all`;
+- Validación del contenedor mediante build, ejecución y pruebas reales contra el endpoint `/predict`.
+
+Estas medidas fortalecen la reproductibilidad y seguridad del despliegue, aunque no sustituyen prácticas más avanzadas como lockfiles completos, escaneo de imágenes, firma de artefactos o gestión centralizada de dependencias.
+
 ## Instalación
 
 Crear un entorno virtual:
@@ -493,6 +570,18 @@ Instalar las dependencias:
 
 ```powershell
 python -m pip install -r requirements.txt
+```
+
+Para instalar las dependencias de testing:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+Ejecutar la suite automatizada:
+
+```powershell
+python -m pytest tests/test_model_monitoring.py -v
 ```
 
 ## Tecnologías principales
@@ -515,6 +604,10 @@ python -m pip install -r requirements.txt
 - Docker
 - Docker Hub
 - WSL 2
+- GitHub Actions
+- Pytest
+- Pytest-Cov
+- SonarQube Cloud
 
 ## Versionamiento
 
@@ -528,12 +621,15 @@ Versiones estables publicadas hasta el momento:
 | `V1.2.0` | Model Training and Evaluation |
 | `V1.3.0` | Model Monitoring and Streamlit Dashboard |
 | `V1.4.0` | FastAPI and Docker Deployment |
+| `V1.5.0` | Extra Credit: automated testing, CI, SonarQube Quality Gate and security hardening |
 
 El Avance 3 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
 
 El Avance 4 fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests.
 
 La versión estable correspondiente al despliegue mediante FastAPI y Docker fue publicada como `V1.4.0`.
+
+El Extra Credit fue desarrollado en `developer`, validado en `certification` e integrado en `main` mediante Pull Requests. La versión estable de cierre, que incorpora testing automatizado, integración continua, Quality Gate y hardening de seguridad, corresponde a `V1.5.0`.
 
 ## Limitaciones
 
@@ -548,6 +644,8 @@ El proyecto presenta algunas limitaciones que deben considerarse al interpretar 
 - El monitoreo realizado simula una operación temporal utilizando el dataset histórico disponible; no corresponde a un flujo real de datos productivos en tiempo real.
 - El pipeline de despliegue se reconstruye y entrena al iniciar la API; en un entorno productivo más maduro sería conveniente serializar y versionar el artefacto entrenado para desacoplar entrenamiento e inferencia.
 - La API y la imagen Docker representan un despliegue reproducible del modelo base, pero no convierten al modelo en un modelo productivo definitivo; las limitaciones predictivas detectadas anteriormente, especialmente el bajo Recall, continúan vigentes.
+- Las pruebas automatizadas incorporadas en el Extra Credit se concentran en reglas críticas de `model_monitoring.py` y no representan cobertura exhaustiva de todos los módulos del repositorio.
+- El Quality Gate aprobado valida las condiciones configuradas para el alcance de New Code; no debe interpretarse como evidencia de cobertura total del proyecto.
 
 ## Estado actual del proyecto
 
@@ -558,6 +656,7 @@ Avance 1 → Versionamiento, carga y EDA
 Avance 2 → Feature Engineering y Model Training and Evaluation
 Avance 3 → Model Monitoring and Streamlit Dashboard
 Avance 4 → FastAPI, Docker y publicación de imagen en Docker Hub
+Extra Credit → Testing automatizado, CI, SonarQube Quality Gate y hardening de seguridad
 ```
 
 Estado del Avance 4:
@@ -568,8 +667,19 @@ Avance 4 certificado e integrado en main.
 Imagen publicada y validada en Docker Hub.
 ```
 
+Estado del Extra Credit:
+
+```text
+Suite de 12 tests automatizados aprobada.
+Integración continua mediante GitHub Actions completada.
+Anñalisis de SonarQube Cloud integrado al flujo de Pull Requests.
+Quality Gate aprobado en la promoción final certification → main.
+Hardening de Docker y dependencias de validado.
+Extra Credit certificado e integrado en main.
+```
+
 Última versión estable publicada:
 
 ```text
-V1.4.0
+V1.5.0
 ```
